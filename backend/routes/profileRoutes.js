@@ -6,7 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const { readData, writeData } = require('../helpers/fileHelper');
-const { fetchLeetCodeStats, fetchCodeforcesStats } = require('../services/platformService');
+const { fetchLeetCodeStats, fetchCodeforcesStats, fetchGitHubStats } = require('../services/platformService');
 
 /**
  * GET /api/profile/:username

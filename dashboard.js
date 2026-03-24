@@ -3,17 +3,59 @@
 // Connected to JSON File Storage API
 // ================================
 
+// ================================
+// CONFIGURATION & SETUP
+// ================================
+
 // Dynamic API URL - works locally and on deployment
-const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+const BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
   ? 'http://localhost:5000/api'
   : '/api';
 
-// Get authenticated username from localStorage (set during login)
-let USERNAME = localStorage.getItem('username');
-if (!USERNAME) {
-  console.warn('⚠️ No username found in localStorage. Redirecting to login...');
-  window.location.href = 'login.html';
+console.log('🌐 API Base URL:', BASE_URL);
+
+// Get user profile from API (NEW SYSTEM)
+let USER_PROFILE = null;
+let USERNAME = null;
+let PROFILE_ID = null;
+
+async function loadUserProfile() {
+  try {
+    // Get profile ID from localStorage
+    PROFILE_ID = localStorage.getItem('profileId');
+
+    if (!PROFILE_ID) {
+      throw new Error('No profile ID found');
+    }
+
+    console.log('📋 Fetching profile from API:', PROFILE_ID);
+
+    // Fetch profile from API
+    const response = await fetch(`${BASE_URL}/profiles/${PROFILE_ID}`);
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || 'Failed to load profile');
+    }
+
+    USER_PROFILE = result.profile;
+    USERNAME = USER_PROFILE.name;
+
+    console.log('✅ Profile loaded from API:', USER_PROFILE);
+    console.log('👤 Username:', USERNAME);
+
+    return true;
+  } catch (error) {
+    console.error('❌ Error loading user profile:', error);
+    console.warn('⚠️ Redirecting to profile setup...');
+    alert('No profile found. Please set up your profile first.');
+    window.location.href = 'index.html';
+    return false;
+  }
 }
+
+// Load profile on startup (async - will be awaited in DOMContentLoaded)
+let profileLoadPromise = loadUserProfile();
 
 // Helper function to get auth headers
 function getAuthHeader() {
@@ -24,15 +66,122 @@ function getAuthHeader() {
   };
 }
 
+// Get platform username
+function getPlatformUsername(platform) {
+  if (!USER_PROFILE) return null;
+  return USER_PROFILE[platform.toLowerCase()] || null;
+}
+
 console.log('Dashboard loaded successfully!');
-console.log('API URL:', API_URL);
-console.log('Authenticated user:', USERNAME);
+console.log('API URL:', BASE_URL);
+console.log('User Profile:', USER_PROFILE);
+
+// ================================
+// INITIALIZE DASHBOARD
+// ================================
 
 // Initialize dashboard on page load
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
+  // Wait for profile to load from API
+  await profileLoadPromise;
+
+  // Now load dashboard data
   loadDashboardData();
   initProgressChart();
 });
+
+// ================================
+// PLATFORM STATS API FUNCTIONS
+// ================================
+
+// Fetch GitHub stats
+async function fetchGitHubStats(username) {
+  if (!username) {
+    console.warn('⚠️ GitHub username not set');
+    return null;
+  }
+
+  try {
+    console.log(`🐙 Fetching GitHub stats for ${username}...`);
+    const response = await fetch(`${BASE_URL}/github/${username}`);
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('✅ GitHub stats fetched:', data);
+    return data;
+  } catch (error) {
+    console.error('❌ Error fetching GitHub stats:', error.message);
+    return null;
+  }
+}
+
+// Fetch LeetCode stats
+async function fetchLeetCodeStats(username) {
+  if (!username) {
+    console.warn('⚠️ LeetCode username not set');
+    return null;
+  }
+
+  try {
+    console.log(`💻 Fetching LeetCode stats for ${username}...`);
+    const response = await fetch(`${BASE_URL}/leetcode/${username}`);
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('✅ LeetCode stats fetched:', data);
+    return data;
+  } catch (error) {
+    console.error('❌ Error fetching LeetCode stats:', error.message);
+    return null;
+  }
+}
+
+// Fetch Codeforces stats
+async function fetchCodeforcesStats(username) {
+  if (!username) {
+    console.warn('⚠️ Codeforces username not set');
+    return null;
+  }
+
+  try {
+    console.log(`🚀 Fetching Codeforces stats for ${username}...`);
+    const response = await fetch(`${BASE_URL}/codeforces/${username}`);
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('✅ Codeforces stats fetched:', data);
+    return data;
+  } catch (error) {
+    console.error('❌ Error fetching Codeforces stats:', error.message);
+    return null;
+  }
+}
+
+// Fetch all platform stats
+async function fetchAllPlatformStats() {
+  console.log('📊 Fetching all platform stats...');
+
+  const [gitHub, leetCode, codeforces] = await Promise.all([
+    fetchGitHubStats(USER_PROFILE?.github),
+    fetchLeetCodeStats(USER_PROFILE?.leetcode),
+    fetchCodeforcesStats(USER_PROFILE?.codeforces)
+  ]);
+
+  return {
+    github: gitHub,
+    leetcode: leetCode,
+    codeforces: codeforces
+  };
+}
 
 // ================================
 // API FUNCTIONS (JSON Storage)
@@ -42,7 +191,7 @@ document.addEventListener('DOMContentLoaded', function() {
 async function fetchQuestions(username) {
   try {
     console.log(`📚 Fetching questions for ${username}...`);
-    const response = await fetch(`${API_URL}/questions/${username}`, {
+    const response = await fetch(`${BASE_URL}/questions/${username}`, {
       headers: getAuthHeader()
     });
 
@@ -75,7 +224,7 @@ async function fetchQuestions(username) {
 async function fetchRevisions(username) {
   try {
     console.log(`📋 Fetching revisions for ${username}...`);
-    const response = await fetch(`${API_URL}/revision/${username}`, {
+    const response = await fetch(`${BASE_URL}/revision/${username}`, {
       headers: getAuthHeader()
     });
 
@@ -116,7 +265,7 @@ async function addNewQuestion(name, topic, difficulty) {
 
     console.log('📤 Adding new question:', payload);
 
-    const response = await fetch(`${API_URL}/questions`, {
+    const response = await fetch(`${BASE_URL}/questions`, {
       method: 'POST',
       headers: getAuthHeader(),
       body: JSON.stringify(payload)
@@ -148,7 +297,7 @@ async function markComplete(questionId, revisionType) {
     
     console.log(`✏️ Marking revision complete:`, { questionId, revisionType });
 
-    const response = await fetch(`${API_URL}/revision/${USERNAME}/${questionId}`, {
+    const response = await fetch(`${BASE_URL}/revision/${USERNAME}/${questionId}`, {
       method: 'PATCH',
       headers: getAuthHeader(),
       body: JSON.stringify(payload)
@@ -178,51 +327,55 @@ async function markComplete(questionId, revisionType) {
 // ================================
 
 // Update metric cards
-function updateMetricCards(questionsData, revisionsData) {
-  if (!questionsData) return;
+function updateMetricCards(questionsData, revisionsData, platformStats) {
+  // PRIORITY: Show LeetCode stats if available
+  if (platformStats && platformStats.leetcode && !platformStats.leetcode.error) {
+    const solved = platformStats.leetcode.solved || 0;
+    const easy = platformStats.leetcode.easy || 0;
+    const medium = platformStats.leetcode.medium || 0;
+    const hard = platformStats.leetcode.hard || 0;
 
-  const { totalQuestions, stats } = questionsData;
-  const revSummary = revisionsData?.summary || { dueToday: 0, completed: 0, upcoming: 0 };
+    // Update Total Solved from LeetCode
+    const solvedEl = document.getElementById('metricSolved');
+    const easyEl = document.getElementById('metricEasy');
+    const mediumEl = document.getElementById('metricMedium');
+    const hardEl = document.getElementById('metricHard');
 
-  // Find all metric cards
-  const metricCards = document.querySelectorAll('.metric-card');
+    if (solvedEl) solvedEl.textContent = solved;
+    if (easyEl) easyEl.textContent = `E: ${easy}`;
+    if (mediumEl) mediumEl.textContent = `M: ${medium}`;
+    if (hardEl) hardEl.textContent = `H: ${hard}`;
 
-  // Total Solved (first card)
-  if (metricCards[0]) {
-    const valueEl = metricCards[0].querySelector('.metric-value');
-    const metaEl = metricCards[0].querySelector('.metric-meta');
-    if (valueEl) valueEl.textContent = totalQuestions || 0;
-    if (metaEl) {
-      const easy = stats?.easy || 0;
-      const medium = stats?.medium || 0;
-      const hard = stats?.hard || 0;
-      metaEl.textContent = `Easy: ${easy} • Medium: ${medium} • Hard: ${hard}`;
+    console.log('✅ Updated metrics with LeetCode stats:', {solved, easy, medium, hard});
+  } else if (questionsData) {
+    // Fallback: Show internal CodeTrack questions if LeetCode not available
+    const { totalQuestions, stats } = questionsData;
+    const metricCards = document.querySelectorAll('.metric-card');
+
+    if (metricCards[0]) {
+      const valueEl = metricCards[0].querySelector('.metric-value');
+      if (valueEl) valueEl.textContent = totalQuestions || 0;
+      console.log('✅ Updated metrics with internal questions:', totalQuestions);
     }
   }
 
-  // Revision Progress (second card)
-  if (metricCards[1]) {
-    const valueEl = metricCards[1].querySelector('.metric-value');
-    const metaEl = metricCards[1].querySelector('.metric-meta');
+  // Update revision progress if available
+  if (revisionsData && revisionsData.summary) {
+    const revSummary = revisionsData.summary;
     const dueToday = revSummary.dueToday || 0;
     const completed = revSummary.completed || 0;
     const upcoming = revSummary.upcoming || 0;
     const total = completed + upcoming + dueToday;
     const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
-    if (valueEl) valueEl.textContent = percent + '%';
-    if (metaEl) metaEl.textContent = `${dueToday} due today`;
-  }
 
-  // Bookmarks (third card) - placeholder
-  if (metricCards[2]) {
-    const valueEl = metricCards[2].querySelector('.metric-value');
-    if (valueEl) valueEl.textContent = '0';
+    const metricCards = document.querySelectorAll('.metric-card');
+    if (metricCards[1]) {
+      const valueEl = metricCards[1].querySelector('.metric-value');
+      const metaEl = metricCards[1].querySelector('.metric-meta');
+      if (valueEl) valueEl.textContent = percent + '%';
+      if (metaEl) metaEl.textContent = `${dueToday} due today`;
+    }
   }
-
-  // Update sidebar stats
-  const sidebarStats = document.querySelectorAll('.stat-number');
-  if (sidebarStats[0]) sidebarStats[0].textContent = totalQuestions || 0;
-  if (sidebarStats[1]) sidebarStats[1].textContent = revSummary.dueToday || 0;
 }
 
 // Update difficulty breakdown
@@ -388,15 +541,102 @@ function updateProfile() {
   const avatarEl = document.querySelector('.avatar');
 
   if (!USERNAME) {
-    console.error('No username available');
+    console.error('❌ No username available');
     return;
   }
 
+  // Use actual name from profile
   const displayName = USERNAME.charAt(0).toUpperCase() + USERNAME.slice(1);
-  
+
   if (nameEl) nameEl.textContent = displayName;
-  if (emailEl) emailEl.textContent = USERNAME + '@codetrack.dev';
+  if (emailEl) emailEl.textContent = USERNAME.toLowerCase() + '@codetrack.dev';
   if (avatarEl) avatarEl.textContent = USERNAME.substring(0, 2).toUpperCase();
+
+  // Update sidebar profile with dynamic links
+  if (typeof updateSidebarProfile === 'function') {
+    updateSidebarProfile();
+  }
+
+  // Log platform usernames (for debugging)
+  console.log('📱 Platform Usernames:');
+  console.log('  GitHub:', USER_PROFILE?.github || 'Not set');
+  console.log('  LeetCode:', USER_PROFILE?.leetcode || 'Not set');
+  console.log('  Codeforces:', USER_PROFILE?.codeforces || 'Not set');
+}
+
+// Display platform stats in UI
+function displayPlatformStats(stats) {
+  console.log('🎨 Displaying platform stats...');
+
+  // GitHub Stats
+  if (stats.github) {
+    const ghEl = document.getElementById('githubStats');
+    if (ghEl) {
+      const repos = stats.github.public_repos || 0;
+      const followers = stats.github.followers || 0;
+      ghEl.innerHTML = `
+        <div style="padding: 12px; text-align: center;">
+          <div style="font-size: 18px; font-weight: 700; color: var(--accent);">${repos}</div>
+          <div style="font-size: 11px; color: var(--text-2); margin-top: 4px;">Public Repos</div>
+          <div style="font-size: 12px; color: var(--text-3); margin-top: 6px;">👥 ${followers} followers</div>
+        </div>
+      `;
+    }
+  }
+
+  // LeetCode Stats
+  if (stats.leetcode && !stats.leetcode.error) {
+    const lcEl = document.getElementById('leetcodeStats');
+    if (lcEl) {
+      const solved = stats.leetcode.solved || 0;
+      const easy = stats.leetcode.easy || 0;
+      const medium = stats.leetcode.medium || 0;
+      const hard = stats.leetcode.hard || 0;
+      lcEl.innerHTML = `
+        <div style="padding: 12px; text-align: center;">
+          <div style="font-size: 18px; font-weight: 700; color: var(--accent);">${solved}</div>
+          <div style="font-size: 11px; color: var(--text-2); margin-top: 4px;">Problems Solved</div>
+          <div style="font-size: 11px; color: var(--text-3); margin-top: 6px;">
+            🟢 ${easy} • 🟡 ${medium} • 🔴 ${hard}
+          </div>
+        </div>
+      `;
+    }
+  } else if (stats.leetcode?.error) {
+    const lcEl = document.getElementById('leetcodeStats');
+    if (lcEl) {
+      lcEl.innerHTML = `
+        <div style="padding: 12px; text-align: center; color: var(--text-3);">
+          User not found
+        </div>
+      `;
+    }
+  }
+
+  // Codeforces Stats
+  if (stats.codeforces && !stats.codeforces.error) {
+    const cfEl = document.getElementById('codeforcesStats');
+    if (cfEl) {
+      const rating = stats.codeforces.rating || 0;
+      const solved = stats.codeforces.solvedCount || 0;
+      cfEl.innerHTML = `
+        <div style="padding: 12px; text-align: center;">
+          <div style="font-size: 18px; font-weight: 700; color: var(--accent);">${rating}</div>
+          <div style="font-size: 11px; color: var(--text-2); margin-top: 4px;">Rating</div>
+          <div style="font-size: 12px; color: var(--text-3); margin-top: 6px;">✓ ${solved} solved</div>
+        </div>
+      `;
+    }
+  } else if (stats.codeforces?.error) {
+    const cfEl = document.getElementById('codeforcesStats');
+    if (cfEl) {
+      cfEl.innerHTML = `
+        <div style="padding: 12px; text-align: center; color: var(--text-3);">
+          User not found
+        </div>
+      `;
+    }
+  }
 }
 
 // ================================
@@ -486,37 +726,58 @@ async function loadDashboardData() {
   if (mainContent) mainContent.style.opacity = '0.6';
 
   try {
-    // Fetch all data in parallel
-    const [questionsData, revisionsData] = await Promise.all([
-      fetchQuestions(USERNAME),
-      fetchRevisions(USERNAME)
-    ]);
+    // Check if user has authentication token
+    const hasAuth = !!localStorage.getItem('token');
+    console.log('🔐 Has authentication:', hasAuth);
 
-    // Check if both fetches were successful
-    if (!questionsData || !questionsData.success) {
-      console.error('Failed to load questions');
-      alert('Failed to load questions data. Please refresh the page.');
-      return;
+    let questionsData = null;
+    let revisionsData = null;
+    let platformStats = null;
+
+    if (hasAuth) {
+      // User is logged in - fetch everything (questions, revisions, platform stats)
+      console.log('📊 Fetching full dashboard data (authenticated)...');
+      [questionsData, revisionsData, platformStats] = await Promise.all([
+        fetchQuestions(USERNAME),
+        fetchRevisions(USERNAME),
+        fetchAllPlatformStats()
+      ]);
+    } else {
+      // User has profile but not logged in - only fetch platform stats
+      console.log('📊 Fetching platform stats only (no auth)...');
+      platformStats = await fetchAllPlatformStats();
     }
 
-    if (!revisionsData || !revisionsData.success) {
-      console.error('Failed to load revisions');
-      alert('Failed to load revisions data. Please refresh the page.');
-      return;
-    }
-
-    // Update UI
+    // Update UI based on available data
     updateProfile();
-    updateMetricCards(questionsData, revisionsData);
-    updateDifficultyBreakdown(questionsData.stats);
-    updateRevisionsList(revisionsData);
-    updateTopicsList(questionsData.questions);
+
+    // Always update metric cards with platformStats (if available)
+    updateMetricCards(questionsData, revisionsData, platformStats);
+
+    // Only update questions/revisions details if we have that data
+    if (questionsData && revisionsData) {
+      if (questionsData.success && revisionsData.success) {
+        updateDifficultyBreakdown(questionsData.stats);
+        updateRevisionsList(revisionsData);
+        updateTopicsList(questionsData.questions);
+      } else {
+        console.warn('⚠️ Questions or revisions data unavailable');
+      }
+    } else {
+      console.log('ℹ️ Questions/revisions not loaded (auth required)');
+    }
+
+    // Display platform stats (always available with profile)
+    if (platformStats && (platformStats.github || platformStats.leetcode || platformStats.codeforces)) {
+      displayPlatformStats(platformStats);
+    }
 
     console.log('✅ Dashboard updated successfully!');
 
   } catch (error) {
     console.error('❌ Dashboard load error:', error);
-    alert('Error loading dashboard: ' + error.message);
+    // Don't alert on error - just log it
+    console.warn('Some data could not be loaded. Platform stats should still be visible.');
   } finally {
     // Remove loading state
     if (mainContent) mainContent.style.opacity = '1';

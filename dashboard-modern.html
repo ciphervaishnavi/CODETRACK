@@ -910,16 +910,15 @@
         </div>
       </div>
 
-      <div class="social-links">
-        <a href="https://github.com/ciphervaishnavi" target="_blank" class="social-link" title="GitHub">
+      <div class="social-links" id="socialLinksContainer">
+        <a id="githubLink" href="#" target="_blank" class="social-link" title="GitHub" style="display:none;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
         </a>
-        <a href="https://www.linkedin.com/in/vaishnavishukla019/" target="_blank" class="social-link" title="LinkedIn">
+        <a id="linkedinLink" href="#" target="_blank" class="social-link" title="LinkedIn" style="display:none;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
         </a>
-        <a href="https://leetcode.com/u/vaish_cpp/" target="_blank" class="social-link" title="LeetCode">LC</a>
-        <a href="https://www.codechef.com/users/helloworld_06" target="_blank" class="social-link" title="CodeChef">CC</a>
-        <a href="https://codeforces.com/profile/vaishnavishukla439" target="_blank" class="social-link" title="Codeforces">CF</a>
+        <a id="leetcodeLink" href="#" target="_blank" class="social-link" title="LeetCode" style="display:none;">LC</a>
+        <a id="codeforcesLink" href="#" target="_blank" class="social-link" title="Codeforces" style="display:none;">CF</a>
       </div>
 
       <div class="nav-section-label">Menu</div>
@@ -984,12 +983,12 @@
           <div class="metric-card green">
             <div class="metric-glow"></div>
             <div class="metric-icon">✦</div>
-            <div class="metric-label">Total Solved</div>
-            <div class="metric-value" id="metricSolved">10</div>
+            <div class="metric-label">LeetCode Solved</div>
+            <div class="metric-value" id="metricSolved">0</div>
             <div class="metric-pills">
-              <span class="pill easy" id="metricEasy">E: 5</span>
-              <span class="pill medium" id="metricMedium">M: 4</span>
-              <span class="pill hard" id="metricHard">H: 1</span>
+              <span class="pill easy" id="metricEasy">E: 0</span>
+              <span class="pill medium" id="metricMedium">M: 0</span>
+              <span class="pill hard" id="metricHard">H: 0</span>
             </div>
           </div>
 
@@ -999,7 +998,7 @@
             <div class="metric-label">Revision Progress</div>
             <div class="progress-ring-wrap">
               <div>
-                <div class="metric-value" id="metricRevPct">9%</div>
+                <div class="metric-value" id="metricRevPct">-</div>
                 <div class="metric-pills">
                   <span class="pill info" id="metricRevCount">1 of 11</span>
                 </div>
@@ -1025,8 +1024,38 @@
 
         </div>
 
-        <!-- CONTENT -->
-        <div class="section-label">Details</div>
+        <!-- PLATFORM STATS -->
+        <div class="section-label">Platform Links</div>
+        <div class="metrics-grid">
+
+          <div class="metric-card green">
+            <div class="metric-glow"></div>
+            <div class="metric-icon">🐙</div>
+            <div class="metric-label">GitHub</div>
+            <div id="githubStats" style="padding: 12px; text-align: center; color: var(--text-3);">
+              Not configured
+            </div>
+          </div>
+
+          <div class="metric-card blue">
+            <div class="metric-glow"></div>
+            <div class="metric-icon">💻</div>
+            <div class="metric-label">LeetCode</div>
+            <div id="leetcodeStats" style="padding: 12px; text-align: center; color: var(--text-3);">
+              Not configured
+            </div>
+          </div>
+
+          <div class="metric-card amber">
+            <div class="metric-glow"></div>
+            <div class="metric-icon">🚀</div>
+            <div class="metric-label">Codeforces</div>
+            <div id="codeforcesStats" style="padding: 12px; text-align: center; color: var(--text-3);">
+              Not configured
+            </div>
+          </div>
+
+        </div>
         <div class="content-grid">
 
           <!-- LEFT -->
@@ -1206,15 +1235,240 @@
     /* ============================================
        NAVIGATION
     ============================================ */
+    let currentView = 'dashboard';
+    let originalDashboardContent = null;
+
     function setNav(el, view) {
       document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
       el.classList.add('active');
-      const views = { problems: 'Problems', revisions: 'Revisions', bookmarks: 'Bookmarks', dashboard: 'Dashboard' };
-      if (view !== 'dashboard') {
-        showToast(views[view] + ' view coming soon!');
+
+      // Save original dashboard content on first navigation away
+      if (currentView === 'dashboard' && view !== 'dashboard' && !originalDashboardContent) {
+        originalDashboardContent = document.querySelector('.page-body').innerHTML;
+      }
+
+      currentView = view;
+
+      // Update header title
+      const titles = { problems: 'Problems', revisions: 'Revisions', bookmarks: 'Bookmarks', dashboard: 'Dashboard' };
+      const headerTitle = document.querySelector('.topbar h1');
+      if (headerTitle) headerTitle.textContent = titles[view] || 'Dashboard';
+
+      if (view === 'dashboard') {
+        showDashboardView();
         if (typeof loadDashboardData === 'function') loadDashboardData();
+      } else if (view === 'problems') {
+        showProblemsView();
+      } else if (view === 'revisions') {
+        showRevisionsView();
+      } else if (view === 'bookmarks') {
+        showBookmarksView();
+      }
+    }
+
+    function showDashboardView() {
+      const pageBody = document.querySelector('.page-body');
+      if (originalDashboardContent) {
+        pageBody.innerHTML = originalDashboardContent;
+        // Re-initialize chart after restoring
+        setTimeout(() => {
+          initChart();
+          if (typeof loadDashboardData === 'function') loadDashboardData();
+        }, 100);
+      }
+    }
+
+    async function showProblemsView() {
+      const pageBody = document.querySelector('.page-body');
+      if (!pageBody) return;
+
+      // Show loading state
+      pageBody.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-2);">Loading problems...</div>';
+
+      try {
+        // Try to fetch problems from API
+        const hasAuth = !!localStorage.getItem('token');
+        const username = localStorage.getItem('username');
+
+        if (hasAuth && username) {
+          const BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:5000/api'
+            : '/api';
+
+          const response = await fetch(`${BASE_URL}/questions/${username}`, {
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+          });
+          const data = await response.json();
+
+          if (data.success && data.questions && data.questions.length > 0) {
+            renderProblemsContent(pageBody, data.questions);
+          } else {
+            renderEmptyProblems(pageBody);
+          }
+        } else {
+          renderEmptyProblems(pageBody);
+        }
+      } catch (error) {
+        console.error('Error loading problems:', error);
+        renderEmptyProblems(pageBody);
+      }
+    }
+
+    function renderProblemsContent(container, problems) {
+      container.innerHTML = `
+        <div class="section-label">All Problems</div>
+        <div class="card" style="max-height: 600px; overflow-y: auto;">
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            ${problems.map(p => `
+              <div class="revision-row" style="cursor: default;">
+                <div class="revision-info">
+                  <span class="revision-name">${p.name}</span>
+                  <span class="revision-topic">${p.topic}</span>
+                </div>
+                <span class="diff-badge ${p.difficulty || 'medium'}">${(p.difficulty || 'MEDIUM').toUpperCase()}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+        <button class="btn-primary" style="margin-top: 16px;" onclick="openModal()">+ Add New Problem</button>
+      `;
+    }
+
+    function renderEmptyProblems(container) {
+      container.innerHTML = `
+        <div style="padding: 60px 40px; text-align: center;">
+          <div style="font-size: 48px; margin-bottom: 16px;">📝</div>
+          <div style="font-size: 20px; font-weight: 600; color: var(--text-1); margin-bottom: 8px;">No Problems Yet</div>
+          <div style="color: var(--text-2); margin-bottom: 24px;">Add your first problem to start tracking your DSA progress.</div>
+          <button class="btn-primary" onclick="openModal()">+ Add Problem</button>
+        </div>
+      `;
+    }
+
+    async function showRevisionsView() {
+      const pageBody = document.querySelector('.page-body');
+      if (!pageBody) return;
+
+      pageBody.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-2);">Loading revisions...</div>';
+
+      try {
+        const hasAuth = !!localStorage.getItem('token');
+        const username = localStorage.getItem('username');
+
+        if (hasAuth && username) {
+          const BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:5000/api'
+            : '/api';
+
+          const response = await fetch(`${BASE_URL}/revision/${username}`, {
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+          });
+          const data = await response.json();
+
+          if (data.success) {
+            renderRevisionsContent(pageBody, data);
+          } else {
+            renderEmptyRevisions(pageBody);
+          }
+        } else {
+          renderEmptyRevisions(pageBody);
+        }
+      } catch (error) {
+        console.error('Error loading revisions:', error);
+        renderEmptyRevisions(pageBody);
+      }
+    }
+
+    function renderRevisionsContent(container, data) {
+      const dueToday = data.dueToday || [];
+      const upcoming = data.upcoming || [];
+      const completed = data.completed || [];
+
+      container.innerHTML = `
+        <div class="section-label">Due Today (${dueToday.length})</div>
+        <div class="card" style="margin-bottom: 16px; max-height: 300px; overflow-y: auto;">
+          ${dueToday.length > 0 ? dueToday.map(r => `
+            <div class="revision-row" onclick="handleRevisionClick('${r.id}', '${r.revisionType}')">
+              <div class="revision-info">
+                <span class="revision-name">${r.name}</span>
+                <span class="revision-topic">${r.topic} • ${r.revisionType}</span>
+              </div>
+              <span class="diff-badge ${r.difficulty || 'medium'}">${(r.difficulty || 'MEDIUM').toUpperCase()}</span>
+            </div>
+          `).join('') : '<div style="padding: 20px; text-align: center; color: var(--text-3);">No revisions due today!</div>'}
+        </div>
+
+        <div class="section-label">Upcoming (${upcoming.length})</div>
+        <div class="card" style="max-height: 300px; overflow-y: auto;">
+          ${upcoming.length > 0 ? upcoming.map(r => `
+            <div class="revision-row" style="cursor: default;">
+              <div class="revision-info">
+                <span class="revision-name">${r.name}</span>
+                <span class="revision-topic">${r.topic} • Due: ${formatDate(r.dueDate)}</span>
+              </div>
+              <span class="diff-badge ${r.difficulty || 'medium'}">${(r.difficulty || 'MEDIUM').toUpperCase()}</span>
+            </div>
+          `).join('') : '<div style="padding: 20px; text-align: center; color: var(--text-3);">No upcoming revisions</div>'}
+        </div>
+      `;
+    }
+
+    function renderEmptyRevisions(container) {
+      container.innerHTML = `
+        <div style="padding: 60px 40px; text-align: center;">
+          <div style="font-size: 48px; margin-bottom: 16px;">🔄</div>
+          <div style="font-size: 20px; font-weight: 600; color: var(--text-1); margin-bottom: 8px;">No Revisions Scheduled</div>
+          <div style="color: var(--text-2); margin-bottom: 24px;">Add problems to automatically schedule spaced repetition revisions.</div>
+          <button class="btn-primary" onclick="openModal()">+ Add Problem</button>
+        </div>
+      `;
+    }
+
+    function showBookmarksView() {
+      const pageBody = document.querySelector('.page-body');
+      if (!pageBody) return;
+
+      // Get bookmarks from localStorage
+      const bookmarks = JSON.parse(localStorage.getItem('bookmarks') || '[]');
+
+      if (bookmarks.length > 0) {
+        pageBody.innerHTML = `
+          <div class="section-label">Bookmarked Problems</div>
+          <div class="card" style="max-height: 600px; overflow-y: auto;">
+            ${bookmarks.map(b => `
+              <div class="bookmark-row">
+                <span class="bookmark-icon">🔖</span>
+                <span class="bookmark-name">${b.name}</span>
+                <span class="bookmark-tag">${b.topic || 'uncategorized'}</span>
+              </div>
+            `).join('')}
+          </div>
+        `;
       } else {
-        if (typeof loadDashboardData === 'function') loadDashboardData();
+        pageBody.innerHTML = `
+          <div style="padding: 60px 40px; text-align: center;">
+            <div style="font-size: 48px; margin-bottom: 16px;">🔖</div>
+            <div style="font-size: 20px; font-weight: 600; color: var(--text-1); margin-bottom: 8px;">No Bookmarks Yet</div>
+            <div style="color: var(--text-2); margin-bottom: 24px;">Bookmark important problems to revisit later.</div>
+          </div>
+        `;
+      }
+    }
+
+    // Helper for date formatting
+    function formatDate(dateStr) {
+      if (!dateStr) return 'Unknown';
+      try {
+        const date = new Date(dateStr);
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
+        if (date.toDateString() === today.toDateString()) return 'Today';
+        if (date.toDateString() === tomorrow.toDateString()) return 'Tomorrow';
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      } catch (e) {
+        return dateStr;
       }
     }
 
@@ -1464,18 +1718,80 @@
         initChart();
       }, 100);
 
-      // Update username from localStorage
-      const uname = localStorage.getItem('username');
-      if (uname) {
-        const n = document.getElementById('sidebarName');
-        const a = document.getElementById('sidebarAvatar');
-        if (n) n.textContent = uname;
-        if (a) a.textContent = uname.slice(0,2).toUpperCase();
-      }
+      // Update profile from USER_PROFILE (set by dashboard.js)
+      setTimeout(() => {
+        updateSidebarProfile();
+      }, 500);
 
       // Expose initProgressChart for dashboard.js compatibility
       window.initProgressChart = initChart;
     });
+
+    // Function to update sidebar with user profile data
+    function updateSidebarProfile() {
+      // Check if USER_PROFILE is available from dashboard.js
+      if (typeof USER_PROFILE !== 'undefined' && USER_PROFILE) {
+        const profile = USER_PROFILE;
+
+        // Update name and avatar
+        const nameEl = document.getElementById('sidebarName');
+        const avatarEl = document.getElementById('sidebarAvatar');
+
+        if (nameEl && profile.name) {
+          nameEl.textContent = profile.name;
+        }
+        if (avatarEl && profile.name) {
+          avatarEl.textContent = profile.name.slice(0, 2).toUpperCase();
+        }
+
+        // Update social links dynamically
+        if (profile.github) {
+          const ghLink = document.getElementById('githubLink');
+          if (ghLink) {
+            ghLink.href = 'https://github.com/' + profile.github;
+            ghLink.style.display = 'flex';
+          }
+        }
+
+        if (profile.linkedin) {
+          const liLink = document.getElementById('linkedinLink');
+          if (liLink) {
+            liLink.href = 'https://www.linkedin.com/in/' + profile.linkedin;
+            liLink.style.display = 'flex';
+          }
+        }
+
+        if (profile.leetcode) {
+          const lcLink = document.getElementById('leetcodeLink');
+          if (lcLink) {
+            lcLink.href = 'https://leetcode.com/u/' + profile.leetcode;
+            lcLink.style.display = 'flex';
+          }
+        }
+
+        if (profile.codeforces) {
+          const cfLink = document.getElementById('codeforcesLink');
+          if (cfLink) {
+            cfLink.href = 'https://codeforces.com/profile/' + profile.codeforces;
+            cfLink.style.display = 'flex';
+          }
+        }
+
+        console.log('✅ Sidebar profile updated from API data');
+      } else {
+        // Fallback to old localStorage username
+        const uname = localStorage.getItem('username');
+        if (uname) {
+          const n = document.getElementById('sidebarName');
+          const a = document.getElementById('sidebarAvatar');
+          if (n) n.textContent = uname;
+          if (a) a.textContent = uname.slice(0,2).toUpperCase();
+        }
+      }
+    }
+
+    // Expose function globally for dashboard.js to call
+    window.updateSidebarProfile = updateSidebarProfile;
   </script>
 </body>
 </html>

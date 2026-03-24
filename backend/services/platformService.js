@@ -28,6 +28,61 @@ function getCache(key) {
 }
 
 /**
+ * Fetch GitHub stats using REST API
+ * Returns: { login, public_repos, followers, bio }
+ */
+async function fetchGitHubStats(username) {
+  const cacheKey = `github_${username}`;
+  const cached = getCache(cacheKey);
+  if (cached) return cached;
+
+  return new Promise((resolve) => {
+    const options = {
+      hostname: 'api.github.com',
+      path: `/users/${encodeURIComponent(username)}`,
+      method: 'GET',
+      headers: {
+        'User-Agent': 'Mozilla/5.0'
+      }
+    };
+
+    try {
+      const req = https.request(options, (res) => {
+        let data = '';
+        res.on('data', (chunk) => { data += chunk; });
+        res.on('end', () => {
+          try {
+            const json = JSON.parse(data);
+            if (json.message === 'Not Found' || res.statusCode === 404) {
+              resolve(null);
+              return;
+            }
+
+            const result = {
+              login: json.login,
+              public_repos: json.public_repos || 0,
+              followers: json.followers || 0,
+              bio: json.bio || '',
+              avatar_url: json.avatar_url
+            };
+
+            setCache(cacheKey, result);
+            resolve(result);
+          } catch (e) {
+            resolve(null);
+          }
+        });
+      });
+
+      req.on('error', () => resolve(null));
+      req.end();
+    } catch (e) {
+      resolve(null);
+    }
+  });
+}
+
+/**
  * Fetch LeetCode stats using GraphQL API
  * Returns: { solved, easy, medium, hard, recentSubmissions }
  */
@@ -94,11 +149,17 @@ async function fetchLeetCodeStats(handle) {
               hard: 0
             };
 
+            // Parse LeetCode stats properly - "All" contains total, others are by difficulty
             stats.forEach((stat) => {
-              result.solved += stat.count;
-              if (stat.difficulty === 'Easy') result.easy = stat.count;
-              if (stat.difficulty === 'Medium') result.medium = stat.count;
-              if (stat.difficulty === 'Hard') result.hard = stat.count;
+              if (stat.difficulty === 'All') {
+                result.solved = stat.count;  // Use "All" as total (not sum)
+              } else if (stat.difficulty === 'Easy') {
+                result.easy = stat.count;
+              } else if (stat.difficulty === 'Medium') {
+                result.medium = stat.count;
+              } else if (stat.difficulty === 'Hard') {
+                result.hard = stat.count;
+              }
             });
 
             setCache(cacheKey, result);
@@ -208,6 +269,7 @@ async function fetchCodeforcesStats(handle) {
 }
 
 module.exports = {
+  fetchGitHubStats,
   fetchLeetCodeStats,
   fetchCodeforcesStats
 };

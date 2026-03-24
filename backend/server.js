@@ -8,7 +8,8 @@ const userRoutes = require("./routes/userRoutes");  // NEW: JSON file storage
 const questionRoutes2 = require("./routes/questionRoutes");  // NEW: Questions with JSON
 const revisionRoutes = require("./routes/revisionRoutes");  // NEW: Revisions with JSON
 const authRoutes = require("./routes/authRoutes");  // NEW: Authentication routes
-const profileRoutes = require("./routes/profileRoutes");  // NEW: User profiles with platform handles
+const profileRoutes = require("./routes/profileRoutes");  // OLD: User profiles with platform handles
+const profileRoutesNew = require("./routes/profileRoutesNew");  // ⭐ NEW: Clean profile system
 const bookmarkRoutesNew = require("./routes/bookmarkRoutes");  // NEW: Bookmarks with JSON
 const authMiddleware = require("./middlewares/authMiddleware");  // NEW: JWT verification
 
@@ -68,7 +69,120 @@ app.use(express.static(path.join(__dirname, '..'), {
 // Public Auth Routes (no authentication required)
 app.use("/api/auth", authRoutes);
 
-// Protected API Routes (authentication required)
+// ================================
+// PUBLIC PLATFORM STATS ROUTES
+// ================================
+// These endpoints allow fetching public platform stats without authentication
+const { fetchGitHubStats, fetchLeetCodeStats, fetchCodeforcesStats } = require("./services/platformService");
+
+// GET /api/github/:username - Fetch GitHub stats
+app.get("/api/github/:username", async (req, res) => {
+  try {
+    const { username } = req.params;
+    if (!username || username.trim() === '') {
+      return res.status(400).json({
+        success: false,
+        message: 'Username is required'
+      });
+    }
+
+    const stats = await fetchGitHubStats(username);
+    if (!stats) {
+      return res.status(404).json({
+        success: false,
+        error: 'GitHub user not found',
+        username: username
+      });
+    }
+
+    res.json({
+      success: true,
+      ...stats
+    });
+  } catch (error) {
+    console.error('Error fetching GitHub stats:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error'
+    });
+  }
+});
+
+// GET /api/leetcode/:username - Fetch LeetCode stats
+app.get("/api/leetcode/:username", async (req, res) => {
+  try {
+    const { username } = req.params;
+    if (!username || username.trim() === '') {
+      return res.status(400).json({
+        success: false,
+        message: 'Username is required'
+      });
+    }
+
+    const stats = await fetchLeetCodeStats(username);
+    if (!stats) {
+      return res.status(404).json({
+        success: false,
+        error: 'LeetCode user not found',
+        username: username
+      });
+    }
+
+    res.json({
+      success: true,
+      ...stats
+    });
+  } catch (error) {
+    console.error('Error fetching LeetCode stats:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error'
+    });
+  }
+});
+
+// GET /api/codeforces/:username - Fetch Codeforces stats
+app.get("/api/codeforces/:username", async (req, res) => {
+  try {
+    const { username } = req.params;
+    if (!username || username.trim() === '') {
+      return res.status(400).json({
+        success: false,
+        message: 'Username is required'
+      });
+    }
+
+    const stats = await fetchCodeforcesStats(username);
+    if (!stats) {
+      return res.status(404).json({
+        success: false,
+        error: 'Codeforces user not found',
+        username: username
+      });
+    }
+
+    res.json({
+      success: true,
+      ...stats
+    });
+  } catch (error) {
+    console.error('Error fetching Codeforces stats:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error'
+    });
+  }
+});
+
+// ================================
+// PROFILE MANAGEMENT API (NEW - NO AUTH)
+// ================================
+// Clean, simple profile CRUD operations
+app.use("/api/profiles", profileRoutesNew);
+
+// ================================
+// PROTECTED API ROUTES
+// ================================
 // All routes below require valid JWT token in Authorization header
 app.use("/api", authMiddleware);  // Middleware to verify token for all routes below this line
 

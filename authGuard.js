@@ -51,10 +51,23 @@
     const currentPage = window.location.pathname.split('/').pop() || 'dashboard-modern.html';
     const isProtectedPage = PROTECTED_PAGES.some(page => currentPage.includes(page));
 
-    if (isProtectedPage && !isAuthenticated()) {
-      console.log('⚠️ Not authenticated, redirecting to login');
-      window.location.href = 'login.html';
-      return;
+    // ⭐ NEW: Check if user has profile ID in localStorage (NEW SYSTEM)
+    const hasProfileId = !!localStorage.getItem('profileId');
+
+    if (isProtectedPage) {
+      // Allow access if either:
+      // 1. User is authenticated (has token) - OLD SYSTEM
+      // 2. User has profile ID (NEW SYSTEM) - can view platform stats without login
+      if (!isAuthenticated() && !hasProfileId) {
+        console.log('⚠️ No profile found, redirecting to profile setup');
+        window.location.href = 'index.html';
+        return;
+      }
+
+      if (!isAuthenticated() && hasProfileId) {
+        console.log('✅ Profile ID found (no auth needed for platform stats)');
+        return;
+      }
     }
 
     if (isAuthenticated()) {
@@ -207,9 +220,11 @@
     checkAuthOnPageLoad();
   }
 
-  // Optional: Check authentication every 5 minutes
+  // Optional: Check authentication every 5 minutes (DISABLED for profile-only users)
   setInterval(() => {
-    if (!isAuthenticated()) {
+    const hasProfileId = !!localStorage.getItem('profileId');
+    // Only logout if no profile and no auth
+    if (!isAuthenticated() && !hasProfileId) {
       console.warn('⚠️ Token missing or expired');
       logout();
     }

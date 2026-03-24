@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CodeTrack — Profile Setup</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:          #060811;
+      --bg-card:     rgba(15, 17, 26, 0.8);
+      --border:      rgba(255,255,255,0.06);
+      --accent:      #4ade80;
+      --blue:        #60a5fa;
+      --text-1:      #f0f4ff;
+      --text-2:      #8b9bbf;
+      --text-3:      #4a566e;
+      --error:       #f87171;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Syne', sans-serif;
+      background: var(--bg);
+      color: var(--text-1);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    /* Animated background */
+    .bg-mesh {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(100px);
+      opacity: 0.15;
+      animation: drift 12s ease-in-out infinite alternate;
+    }
+
+    .orb-1 {
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, #1a5c3a, transparent);
+      top: -100px;
+      left: -100px;
+    }
+
+    .orb-2 {
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, #1e3a5f, transparent);
+      bottom: -100px;
+      right: -50px;
+      animation-delay: -4s;
+    }
+
+    @keyframes drift {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(30px, 40px) scale(1.1); }
+    }
+
+    .container {
+      position: relative;
+      z-index: 10;
+      max-width: 500px;
+      width: 100%;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .header h1 {
+      font-size: 32px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      font-size: 13px;
+      color: var(--text-2);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    .form-group {
+      margin-bottom: 22px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-2);
+      font-family: 'JetBrains Mono', monospace;
+      margin-bottom: 8px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: rgba(255,255,255,0.02);
+      color: var(--text-1);
+      font-size: 13px;
+      font-family: 'Syne', sans-serif;
+      transition: all 0.2s ease;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      background: rgba(74,222,128,0.12);
+      box-shadow: 0 0 12px rgba(74,222,128,0.2);
+    }
+
+    .form-input::placeholder {
+      color: var(--text-3);
+    }
+
+    .helper-text {
+      font-size: 11px;
+      color: var(--text-3);
+      margin-top: 4px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .message {
+      padding: 12px 14px;
+      border-radius: 9px;
+      margin-bottom: 20px;
+      font-size: 12px;
+      display: none;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .message.success {
+      background: rgba(74,222,128,0.12);
+      border: 1px solid rgba(74,222,128,0.3);
+      color: #4ade80;
+      display: block;
+    }
+
+    .message.error {
+      background: rgba(248,113,113,0.12);
+      border: 1px solid rgba(248,113,113,0.3);
+      color: #f87171;
+      display: block;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 28px;
+    }
+
+    .btn {
+      padding: 11px 24px;
+      border: none;
+      border-radius: 9px;
+      font-size: 12px;
+      font-weight: 700;
+      font-family: 'Syne', sans-serif;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: #030a05;
+      flex: 1;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(34,197,94,0.35);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-secondary {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-2);
+      flex: 1;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .footer-link {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 12px;
+      color: var(--text-2);
+    }
+
+    .footer-link a {
+      color: var(--accent);
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .footer-link a:hover {
+      text-decoration: underline;
+    }
+
+    .loading {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      margin-left: 6px;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.3; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.2); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Background -->
+  <div class="bg-mesh">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+  </div>
+
+  <!-- Main Container -->
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1>CodeTrack</h1>
+      <p>📊 Track your coding progress across platforms</p>
+    </div>
+
+    <!-- Form Card -->
+    <div class="card">
+      <!-- Message Area -->
+      <div id="message" class="message"></div>
+
+      <!-- Profile Form -->
+      <form id="profileForm" onsubmit="handleSubmit(event)">
+
+        <!-- Name Field -->
+        <div class="form-group">
+          <label class="form-label">👤 Full Name</label>
+          <input
+            type="text"
+            id="name"
+            class="form-input"
+            placeholder="e.g., John Doe"
+            autocomplete="name"
+          >
+          <div class="helper-text">Your display name</div>
+        </div>
+
+        <!-- GitHub Field -->
+        <div class="form-group">
+          <label class="form-label">🐙 GitHub Username</label>
+          <input
+            type="text"
+            id="github"
+            class="form-input"
+            placeholder="e.g., johndoe"
+            autocomplete="username"
+          >
+          <div class="helper-text">Your GitHub profile username</div>
+        </div>
+
+        <!-- LeetCode Field -->
+        <div class="form-group">
+          <label class="form-label">💻 LeetCode Username</label>
+          <input
+            type="text"
+            id="leetcode"
+            class="form-input"
+            placeholder="e.g., johndoe"
+            autocomplete="username"
+          >
+          <div class="helper-text">Your LeetCode username</div>
+        </div>
+
+        <!-- Codeforces Field -->
+        <div class="form-group">
+          <label class="form-label">🚀 Codeforces Handle</label>
+          <input
+            type="text"
+            id="codeforces"
+            class="form-input"
+            placeholder="e.g., john_doe"
+            autocomplete="username"
+          >
+          <div class="helper-text">Your Codeforces handle</div>
+        </div>
+
+        <!-- Button Group -->
+        <div class="button-group">
+          <button type="submit" class="btn btn-primary" id="submitBtn">
+            Save Profile
+          </button>
+          <button type="reset" class="btn btn-secondary">
+            Clear
+          </button>
+        </div>
+
+      </form>
+
+      <!-- Footer Link -->
+      <div class="footer-link">
+        Already have a profile? <a onclick="goToDashboard()">Go to Dashboard</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Script -->
+  <script>
+    // ================================
+    // Configuration
+    // ================================
+    const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      ? 'http://localhost:5000/api'
+      : '/api';
+
+    const PROFILE_ID_KEY = 'profileId';
+
+    // ================================
+    // Helper Functions
+    // ================================
+
+    // Show message (success or error)
+    function showMessage(text, type = 'success') {
+      const msgEl = document.getElementById('message');
+      msgEl.textContent = text;
+      msgEl.className = `message ${type}`;
+
+      if (type === 'success') {
+        setTimeout(() => {
+          msgEl.style.display = 'none';
+        }, 3000);
+      }
+    }
+
+    // Get form values
+    function getFormData() {
+      return {
+        name: document.getElementById('name').value.trim(),
+        github: document.getElementById('github').value.trim(),
+        leetcode: document.getElementById('leetcode').value.trim(),
+        codeforces: document.getElementById('codeforces').value.trim()
+      };
+    }
+
+    // Validate form
+    function validateForm(data) {
+      // Name is required
+      if (!data.name) {
+        showMessage('❌ Please enter your name', 'error');
+        document.getElementById('name').focus();
+        return false;
+      }
+
+      // At least one platform username is required
+      if (!data.github && !data.leetcode && !data.codeforces) {
+        showMessage('❌ Please add at least one platform username', 'error');
+        return false;
+      }
+
+      return true;
+    }
+
+    // Create profile via API
+    async function createProfile(data) {
+      try {
+        console.log('📤 Creating profile via API:', data);
+
+        const response = await fetch(`${API_BASE_URL}/profiles`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          throw new Error(result.message || 'Failed to create profile');
+        }
+
+        console.log('✅ Profile created:', result.profile);
+        return result.profile;
+
+      } catch (error) {
+        console.error('❌ Error creating profile:', error);
+        throw error;
+      }
+    }
+
+    // Load existing profile from API
+    async function loadExistingProfile() {
+      try {
+        const profileId = localStorage.getItem(PROFILE_ID_KEY);
+        if (!profileId) return null;
+
+        console.log('📖 Loading existing profile:', profileId);
+
+        const response = await fetch(`${API_BASE_URL}/profiles/${profileId}`);
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+          console.log('✅ Profile loaded:', result.profile);
+          return result.profile;
+        }
+
+        return null;
+      } catch (error) {
+        console.error('❌ Error loading profile:', error);
+        return null;
+      }
+    }
+
+    // Populate form with existing data
+    async function populateForm() {
+      const profile = await loadExistingProfile();
+      if (profile) {
+        document.getElementById('name').value = profile.name || '';
+        document.getElementById('github').value = profile.github || '';
+        document.getElementById('leetcode').value = profile.leetcode || '';
+        document.getElementById('codeforces').value = profile.codeforces || '';
+      }
+    }
+
+    // ================================
+    // Event Handlers
+    // ================================
+
+    // Handle form submission
+    async function handleSubmit(event) {
+      event.preventDefault();
+
+      const data = getFormData();
+      console.log('📤 Form submitted with data:', data);
+
+      // Validate
+      if (!validateForm(data)) {
+        return;
+      }
+
+      // Disable submit button
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Saving...';
+
+      try {
+        // Create profile via API
+        const profile = await createProfile(data);
+
+        // Save profile ID to localStorage
+        localStorage.setItem(PROFILE_ID_KEY, profile.id);
+        console.log('💾 Profile ID saved to localStorage:', profile.id);
+
+        showMessage('✅ Profile saved successfully!', 'success');
+
+        // Redirect to dashboard after 1.5 seconds
+        setTimeout(() => {
+          console.log('🚀 Redirecting to dashboard...');
+          window.location.href = 'dashboard-modern.html';
+        }, 1500);
+
+      } catch (error) {
+        showMessage('❌ Error: ' + error.message, 'error');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Save Profile';
+      }
+    }
+
+    // Go to dashboard
+    function goToDashboard() {
+      const profileId = localStorage.getItem(PROFILE_ID_KEY);
+      if (!profileId) {
+        showMessage('❌ Please create a profile first', 'error');
+        return;
+      }
+      window.location.href = 'dashboard-modern.html';
+    }
+
+    // Make functions global
+    window.handleSubmit = handleSubmit;
+    window.goToDashboard = goToDashboard;
+
+    // ================================
+    // Initialize Page
+    // ================================
+
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('📄 Profile setup page loaded');
+      populateForm();
+    });
+  </script>
+</body>
+</html>

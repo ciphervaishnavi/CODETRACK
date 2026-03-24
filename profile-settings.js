@@ -2,22 +2,50 @@
 // Profile Settings Manager
 // ================================
 
-const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+const BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
   ? 'http://localhost:5000/api'
   : '/api';
 
-let USERNAME = localStorage.getItem('username');
-if (!USERNAME) {
-  window.location.href = 'login.html';
+// Get user profile from API (NEW SYSTEM)
+let USER_PROFILE = null;
+let USERNAME = null;
+let PROFILE_ID = null;
+
+async function loadUserProfile() {
+  try {
+    // Get profile ID from localStorage
+    PROFILE_ID = localStorage.getItem('profileId');
+
+    if (!PROFILE_ID) {
+      throw new Error('No profile ID found');
+    }
+
+    console.log('📋 Fetching profile from API:', PROFILE_ID);
+
+    // Fetch profile from API
+    const response = await fetch(`${BASE_URL}/profiles/${PROFILE_ID}`);
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || 'Failed to load profile');
+    }
+
+    USER_PROFILE = result.profile;
+    USERNAME = USER_PROFILE.name;
+
+    console.log('✅ Profile loaded from API:', USER_PROFILE);
+
+    return true;
+  } catch (error) {
+    console.error('❌ Error loading user profile:', error);
+    alert('No profile found. Please set up your profile first.');
+    window.location.href = 'index.html';
+    return false;
+  }
 }
 
-function getAuthHeader() {
-  const token = localStorage.getItem('token');
-  return {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}`
-  };
-}
+// Load profile on startup
+let profileLoadPromise = loadUserProfile();
 
 function showMessage(text, type) {
   const messageEl = document.getElementById('message');
@@ -31,39 +59,73 @@ function showMessage(text, type) {
   }
 }
 
-// Load current profile
+// Load current profile from API
 async function loadProfile() {
   try {
-    console.log('📋 Loading profile...');
-    const response = await fetch(`${API_URL}/profile/${USERNAME}`, {
-      headers: getAuthHeader()
-    });
+    // Wait for profile to load
+    await profileLoadPromise;
 
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
+    console.log('📋 Populating form with profile data...');
+
+    if (!USER_PROFILE) {
+      showMessage('⚠️ No profile found', 'error');
+      return;
     }
 
-    const data = await response.json();
-    if (!data.success) throw new Error(data.message);
+    // Populate form with existing data
+    document.getElementById('leetcode').value = USER_PROFILE.leetcode || '';
+    document.getElementById('codeforces').value = USER_PROFILE.codeforces || '';
+    document.getElementById('github').value = USER_PROFILE.github || '';
+    document.getElementById('linkedin').value = USER_PROFILE.linkedin || '';
 
-    const profile = data.profile || {};
-    const handles = profile.platformHandles || {};
+    console.log('✅ Form populated');
 
-    // Populate form
-    document.getElementById('leetcode').value = handles.leetcode || '';
-    document.getElementById('codeforces').value = handles.codeforces || '';
-    document.getElementById('github').value = handles.github || '';
-    document.getElementById('linkedin').value = handles.linkedin || '';
-
-    // Show stats if available
-    if (profile.platformStats) {
-      showStats(profile.platformStats);
-    }
-
-    console.log('✅ Profile loaded');
+    // Fetch and display real-time stats
+    fetchAndDisplayStats();
   } catch (error) {
     console.error('Error loading profile:', error);
     showMessage('⚠️ Could not load profile: ' + error.message, 'error');
+  }
+}
+
+// Fetch and display real platform stats
+async function fetchAndDisplayStats() {
+  try {
+    console.log('📊 Fetching platform stats...');
+
+    const stats = {};
+
+    // Fetch GitHub stats
+    if (USER_PROFILE.github) {
+      const ghResponse = await fetch(`${BASE_URL}/github/${USER_PROFILE.github}`);
+      if (ghResponse.ok) {
+        stats.github = await ghResponse.json();
+        console.log('✅ GitHub stats:', stats.github);
+      }
+    }
+
+    // Fetch LeetCode stats
+    if (USER_PROFILE.leetcode) {
+      const lcResponse = await fetch(`${BASE_URL}/leetcode/${USER_PROFILE.leetcode}`);
+      if (lcResponse.ok) {
+        stats.leetcode = await lcResponse.json();
+        console.log('✅ LeetCode stats:', stats.leetcode);
+      }
+    }
+
+    // Fetch Codeforces stats
+    if (USER_PROFILE.codeforces) {
+      const cfResponse = await fetch(`${BASE_URL}/codeforces/${USER_PROFILE.codeforces}`);
+      if (cfResponse.ok) {
+        stats.codeforces = await cfResponse.json();
+        console.log('✅ Codeforces stats:', stats.codeforces);
+      }
+    }
+
+    // Display stats
+    showStats(stats);
+  } catch (error) {
+    console.error('❌ Error fetching stats:', error);
   }
 }
 
@@ -71,22 +133,23 @@ function showStats(stats) {
   const statsGrid = document.getElementById('statsGrid');
   if (!stats || Object.keys(stats).length === 0) return;
 
-  // LC stats
-  if (stats.leetcode) {
-    document.getElementById('lcSolved').textContent = stats.leetcode.totalSolved || '-';
-    document.getElementById('lcEasy').textContent = stats.leetcode.easySolved || '-';
+  // LeetCode stats
+  if (stats.leetcode && stats.leetcode.solved !== undefined) {
+    document.getElementById('lcSolved').textContent = stats.leetcode.solved || 0;
+    document.getElementById('lcEasy').textContent = stats.leetcode.easy || 0;
   }
 
-  // CF stats
-  if (stats.codeforces) {
-    document.getElementById('cfRating').textContent = stats.codeforces.rating || '-';
-    document.getElementById('cfSolved').textContent = stats.codeforces.solvedCount || '-';
+  // Codeforces stats
+  if (stats.codeforces && stats.codeforces.rating !== undefined) {
+    document.getElementById('cfRating').textContent = stats.codeforces.rating || 0;
+    document.getElementById('cfSolved').textContent = stats.codeforces.solvedCount || 0;
   }
 
+  // Show stats grid
   statsGrid.style.display = 'grid';
 }
 
-// Save handles
+// Save handles to API
 async function saveHandles() {
   try {
     const leetcode = document.getElementById('leetcode').value.trim();
@@ -99,12 +162,16 @@ async function saveHandles() {
       return;
     }
 
-    console.log('💾 Saving handles...');
+    console.log('💾 Updating profile via API...');
 
-    const response = await fetch(`${API_URL}/profile/${USERNAME}/handles`, {
-      method: 'PATCH',
-      headers: getAuthHeader(),
+    // Update via API
+    const response = await fetch(`${BASE_URL}/profiles/${PROFILE_ID}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify({
+        name: USERNAME, // Keep existing name
         leetcode: leetcode || null,
         codeforces: codeforces || null,
         github: github || null,
@@ -112,15 +179,20 @@ async function saveHandles() {
       })
     });
 
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
+    const result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error(result.message || 'Failed to update profile');
     }
 
-    const data = await response.json();
-    if (!data.success) throw new Error(data.message);
+    // Update local USER_PROFILE
+    USER_PROFILE = result.profile;
 
     showMessage('✅ Profiles saved successfully!', 'success');
-    console.log('✅ Handles saved');
+    console.log('✅ Profile updated:', result.profile);
+
+    // Fetch and display updated stats
+    fetchAndDisplayStats();
 
   } catch (error) {
     console.error('Error saving handles:', error);
@@ -128,7 +200,7 @@ async function saveHandles() {
   }
 }
 
-// Refresh stats
+// Refresh stats - fetch latest platform data
 async function refreshStats() {
   try {
     const loading = document.querySelector('.loading');
@@ -136,21 +208,11 @@ async function refreshStats() {
 
     console.log('🔄 Refreshing stats...');
 
-    const response = await fetch(`${API_URL}/profile/${USERNAME}/refresh-stats`, {
-      method: 'POST',
-      headers: getAuthHeader()
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
-    }
-
-    const data = await response.json();
-    if (!data.success) throw new Error(data.message);
+    // Fetch fresh stats
+    await fetchAndDisplayStats();
 
     showMessage('✅ Stats refreshed!', 'success');
-    showStats(data.platformStats);
-    console.log('✅ Stats updated:', data.platformStats);
+    console.log('✅ Stats updated');
 
   } catch (error) {
     console.error('Error refreshing stats:', error);
